@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Hydraulic Pipe Calculator | Diameter & Velocity</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="topbar">
+    <div class="wrap topbar__inner">
+      <div class="brand">
+        <div class="brand__logo" aria-hidden="true">H</div>
+        <div class="brand__text">
+          <div class="brand__name">Hydraulic Pipe Calculator</div>
+          <div class="brand__sub">Pressure & Gravity (Manning) • Diameter • Velocity</div>
+        </div>
+      </div>
+      <a class="chip" href="#calc">Online Calculator</a>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <section class="hero">
+      <div class="hero__left">
+        <h1>Size a pipe fast — <span class="accent">with any flow unit</span>.</h1>
+        <p class="muted">
+          Determine <b>pressure pipe diameter</b> from a target velocity, check <b>velocity</b> for any diameter,
+          or size a <b>gravity pipe</b> using Manning (full flow).
+        </p>
+
+        <div class="hero__badges">
+          <div class="badge">
+            <div class="badge__k">Modes</div>
+            <div class="badge__v">Pressure • Gravity</div>
+          </div>
+          <div class="badge">
+            <div class="badge__k">Units</div>
+            <div class="badge__v">L/s • m³/s • gpm • cfs</div>
+          </div>
+          <div class="badge">
+            <div class="badge__k">Outputs</div>
+            <div class="badge__v">D (mm/in) • V (m/s, ft/s)</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="hero__right">
+        <div class="meter">
+          <div class="meter__top">
+            <div class="meter__title">Live Result</div>
+            <div class="meter__pill" id="modePill">Pressure</div>
+          </div>
+          <div class="meter__value">
+            <div class="meter__big" id="bigNumber">—</div>
+            <div class="meter__unit" id="bigUnit">—</div>
+          </div>
+          <div class="meter__bar" aria-hidden="true">
+            <div class="meter__fill" id="meterFill"></div>
+          </div>
+          <div class="meter__hint muted" id="meterHint">Enter inputs to see results.</div>
+        </div>
+      </div>
+    </section>
+
+    <section id="calc" class="panel">
+      <div class="panel__tabs" role="tablist" aria-label="Calculator mode">
+        <button class="tab is-active" data-tab="pressure" role="tab" aria-selected="true">Pressure Pipe</button>
+        <button class="tab" data-tab="gravity" role="tab" aria-selected="false">Gravity Pipe (Manning)</button>
+      </div>
+
+      <!-- PRESSURE -->
+      <div class="tabpane is-active" id="tab-pressure" data-pane="pressure" role="tabpanel">
+        <div class="grid3">
+          <div class="card">
+            <div class="card__title">Inputs</div>
+
+            <div class="field">
+              <label>Flow</label>
+              <div class="row">
+                <input id="qVal" type="number" step="any" placeholder="e.g. 45" />
+                <select id="qUnit">
+                  <option value="Lps">L/s</option>
+                  <option value="m3ps">m³/s</option>
+                  <option value="Lpm">L/min</option>
+                  <option value="m3ph">m³/h</option>
+                  <option value="gpm">gpm (US)</option>
+                  <option value="cfs">cfs</option>
+                </select>
+              </div>
+              <div class="help muted">Flow is converted internally to m³/s.</div>
+            </div>
+
+            <div class="field">
+              <label>Calculation</label>
+              <select id="pressureMode">
+                <option value="D_from_V">Find Diameter from Target Velocity</option>
+                <option value="V_from_D">Find Velocity from Diameter</option>
+              </select>
+            </div>
+
+            <div class="field" id="targetVWrap">
+              <label>Target Velocity</label>
+              <div class="row">
+                <input id="vTarget" type="number" step="any" placeholder="e.g. 1.5" />
+                <select id="vUnit">
+                  <option value="mps">m/s</option>
+                  <option value="ftps">ft/s</option>
+                </select>
+              </div>
+              <div class="help muted">Common range: 1.0–2.5 m/s (pressure networks).</div>
+            </div>
+
+            <div class="field" id="diamWrap" style="display:none;">
+              <label>Diameter</label>
+              <div class="row">
+                <input id="dVal" type="number" step="any" placeholder="e.g. 250" />
+                <select id="dUnit">
+                  <option value="mm">mm</option>
+                  <option value="in">in</option>
+                  <option value="m">m</option>
+                </select>
+              </div>
+              <div class="help muted">Velocity is computed assuming full pipe (closed conduit).</div>
+            </div>
+
+            <div class="actions">
+              <button class="btn" id="btnCalcPressure">Calculate</button>
+              <button class="btn btn--ghost" id="btnResetPressure">Reset</button>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card__title">Results</div>
+
+            <div class="result">
+              <div class="result__label">Diameter</div>
+              <div class="result__value" id="resD">—</div>
+              <div class="result__sub" id="resDSub">—</div>
+            </div>
+
+            <div class="result">
+              <div class="result__label">Velocity</div>
+              <div class="result__value" id="resV">—</div>
+              <div class="result__sub" id="resVSub">—</div>
+            </div>
+
+            <div class="result">
+              <div class="result__label">Area</div>
+              <div class="result__value" id="resA">—</div>
+              <div class="result__sub muted">A = π D² / 4</div>
+            </div>
+
+            <div class="note muted">
+              Tip: For diameter sizing, start with a target velocity and then check if the selected standard diameter is acceptable.
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card__title">Quick Check</div>
+
+            <div class="mini">
+              <div class="mini__row">
+                <div class="mini__k">Flow (m³/s)</div>
+                <div class="mini__v" id="miniQ">—</div>
+              </div>
+              <div class="mini__row">
+                <div class="mini__k">Diameter (m)</div>
+                <div class="mini__v" id="miniD">—</div>
+              </div>
+              <div class="mini__row">
+                <div class="mini__k">Velocity (m/s)</div>
+                <div class="mini__v" id="miniV">—</div>
+              </div>
+            </div>
+
+            <div class="gauge">
+              <div class="gauge__top">
+                <div class="muted">Velocity Gauge</div>
+                <div class="gauge__pill" id="gaugePill">—</div>
+              </div>
+              <div class="gauge__track" aria-hidden="true">
+                <div class="gauge__needle" id="gaugeNeedle"></div>
+              </div>
+              <div class="gauge__labels muted">
+                <span>0</span><span>1</span><span>2</span><span>3</span><span>4+</span>
+              </div>
+              <div class="help muted">Gauge reference only (typical pressure velocity window ~1–2.5 m/s).</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- GRAVITY -->
+      <div class="tabpane" id="tab-gravity" data-pane="gravity" role="tabpanel">
+        <div class="grid3">
+          <div class="card">
+            <div class="card__title">Inputs</div>
+
+            <div class="field">
+              <label>Flow</label>
+              <div class="row">
+                <input id="gQVal" type="number" step="any" placeholder="e.g. 120" />
+                <select id="gQUnit">
+                  <option value="Lps">L/s</option>
+                  <option value="m3ps">m³/s</option>
+                  <option value="Lpm">L/min</option>
+                  <option value="m3ph">m³/h</option>
+                  <option value="gpm">gpm (US)</option>
+                  <option value="cfs">cfs</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="field">
+              <label>Manning n</label>
+              <input id="nVal" type="number" step="any" value="0.013" />
+              <div class="help muted">Typical: PVC/HDPE ~ 0.009–0.013, Concrete ~ 0.013–0.015.</div>
+            </div>
+
+            <div class="field">
+              <label>Slope</label>
+              <div class="row">
+                <input id="sVal" type="number" step="any" placeholder="e.g. 0.005" />
+                <select id="sUnit">
+                  <option value="mperm">m/m</option>
+                  <option value="percent">%</option>
+                  <option value="permil">‰</option>
+                </select>
+              </div>
+              <div class="help muted">Slope is converted internally to m/m.</div>
+            </div>
+
+            <div class="actions">
+              <button class="btn" id="btnCalcGravity">Calculate</button>
+              <button class="btn btn--ghost" id="btnResetGravity">Reset</button>
+            </div>
+
+            <div class="note muted">
+              Gravity uses Manning for a <b>full flowing circular pipe</b>. Partial flow can be added later.
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card__title">Results</div>
+
+            <div class="result">
+              <div class="result__label">Diameter</div>
+              <div class="result__value" id="gResD">—</div>
+              <div class="result__sub" id="gResDSub">—</div>
+            </div>
+
+            <div class="result">
+              <div class="result__label">Velocity</div>
+              <div class="result__value" id="gResV">—</div>
+              <div class="result__sub" id="gResVSub">—</div>
+            </div>
+
+            <div class="result">
+              <div class="result__label">Capacity Check</div>
+              <div class="result__value" id="gResQ">—</div>
+              <div class="result__sub muted">Manning full-flow Q</div>
+            </div>
+
+            <div class="note muted">
+              If you want: add “% full” later (partial flow), include minimum self-cleansing velocity, and headloss options.
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card__title">Quick Check</div>
+
+            <div class="mini">
+              <div class="mini__row">
+                <div class="mini__k">Flow (m³/s)</div>
+                <div class="mini__v" id="gMiniQ">—</div>
+              </div>
+              <div class="mini__row">
+                <div class="mini__k">Slope (m/m)</div>
+                <div class="mini__v" id="gMiniS">—</div>
+              </div>
+              <div class="mini__row">
+                <div class="mini__k">n</div>
+                <div class="mini__v" id="gMiniN">—</div>
+              </div>
+            </div>
+
+            <div class="note muted">
+              Standard diameters support can be added (snap to 200/250/300… mm and re-check velocity).
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <footer class="footer muted">
+      <div>© Hydraulic Calculator • Built for fast design checks</div>
+    </footer>
+  </main>
+
+  <script src="js/app.js"></script>
+</body>
+</html>

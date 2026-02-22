@@ -8,9 +8,6 @@
   --line:rgba(234,240,255,.10);
   --accent:#7cf6ff;
   --accent2:#a78bfa;
-  --good:#7CFFB2;
-  --warn:#FFD37C;
-  --bad:#FF7C9A;
   --shadow: 0 18px 55px rgba(0,0,0,.35);
   --radius: 18px;
 }
@@ -91,12 +88,6 @@ body{
   font-size: clamp(28px, 3.2vw, 44px);
   line-height:1.08;
   letter-spacing:-.6px;
-}
-.accent{
-  background: linear-gradient(135deg, var(--accent), var(--accent2));
-  -webkit-background-clip:text;
-  background-clip:text;
-  color:transparent;
 }
 
 .muted{color:var(--muted)}

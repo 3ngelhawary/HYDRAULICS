@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Hydraulic Pipe Calculator | Diameter & Velocity</title>
+  <title>Hydraulic Pipe Calculator | Diameter, Velocity, Headloss</title>
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -13,7 +13,7 @@
         <div class="brand__logo" aria-hidden="true">H</div>
         <div class="brand__text">
           <div class="brand__name">Hydraulic Pipe Calculator</div>
-          <div class="brand__sub">Pressure & Gravity (Manning) • Diameter • Velocity</div>
+          <div class="brand__sub">Pressure & Gravity (Manning) • Diameter • Velocity • Headloss</div>
         </div>
       </div>
       <a class="chip" href="#calc">Online Calculator</a>
@@ -23,10 +23,10 @@
   <main class="wrap">
     <section class="hero">
       <div class="hero__left">
-        <h1>Size a pipe fast — <span class="accent">with any flow unit</span>.</h1>
+        <h1>Hydraulic Pipe Calculator</h1>
         <p class="muted">
-          Determine <b>pressure pipe diameter</b> from a target velocity, check <b>velocity</b> for any diameter,
-          or size a <b>gravity pipe</b> using Manning (full flow).
+          Determine <b>pressure pipe diameter</b>, compute <b>velocity</b>, and calculate <b>headloss</b>.
+          For gravity pipes, calculate <b>diameter</b> or <b>d/D (%)</b> using Manning.
         </p>
 
         <div class="hero__badges">
@@ -40,7 +40,7 @@
           </div>
           <div class="badge">
             <div class="badge__k">Outputs</div>
-            <div class="badge__v">D (mm/in) • V (m/s, ft/s)</div>
+            <div class="badge__v">D • V • Headloss • d/D</div>
           </div>
         </div>
       </div>
@@ -76,7 +76,13 @@
             <div class="card__title">Inputs</div>
 
             <div class="field">
-              <label>Flow</label>
+              <label>Number of Pipes</label>
+              <input id="pCount" type="number" step="1" min="1" value="1" />
+              <div class="help muted">Total headloss = headloss per pipe × number of pipes (same length/diameter/flow per pipe).</div>
+            </div>
+
+            <div class="field">
+              <label>Flow (per pipe)</label>
               <div class="row">
                 <input id="qVal" type="number" step="any" placeholder="e.g. 45" />
                 <select id="qUnit">
@@ -88,7 +94,7 @@
                   <option value="cfs">cfs</option>
                 </select>
               </div>
-              <div class="help muted">Flow is converted internally to m³/s.</div>
+              <div class="help muted">Converted internally to m³/s.</div>
             </div>
 
             <div class="field">
@@ -121,7 +127,26 @@
                   <option value="m">m</option>
                 </select>
               </div>
-              <div class="help muted">Velocity is computed assuming full pipe (closed conduit).</div>
+              <div class="help muted">Velocity assumes full pipe (closed conduit).</div>
+            </div>
+
+            <div class="field">
+              <label>Pipe Length (per pipe)</label>
+              <div class="row">
+                <input id="pLen" type="number" step="any" placeholder="e.g. 1200" />
+                <select id="pLenUnit">
+                  <option value="m">m</option>
+                  <option value="km">km</option>
+                  <option value="ft">ft</option>
+                </select>
+              </div>
+              <div class="help muted">Used for headloss calculation (Hazen–Williams).</div>
+            </div>
+
+            <div class="field">
+              <label>Hazen–Williams C</label>
+              <input id="hwC" type="number" step="any" value="130" />
+              <div class="help muted">Typical: PVC/HDPE ~ 140–150, DI ~ 130, Steel ~ 120 (project dependent).</div>
             </div>
 
             <div class="actions">
@@ -146,13 +171,19 @@
             </div>
 
             <div class="result">
-              <div class="result__label">Area</div>
-              <div class="result__value" id="resA">—</div>
-              <div class="result__sub muted">A = π D² / 4</div>
+              <div class="result__label">Headloss (per pipe)</div>
+              <div class="result__value" id="resHf">—</div>
+              <div class="result__sub" id="resHfSub">—</div>
+            </div>
+
+            <div class="result">
+              <div class="result__label">Headloss (total)</div>
+              <div class="result__value" id="resHfTot">—</div>
+              <div class="result__sub" id="resHfTotSub">—</div>
             </div>
 
             <div class="note muted">
-              Tip: For diameter sizing, start with a target velocity and then check if the selected standard diameter is acceptable.
+              Headloss is Hazen–Williams (SI): <b>hf = 10.67 · L · Q<sup>1.852</sup> / (C<sup>1.852</sup> · D<sup>4.871</sup>)</b>
             </div>
           </div>
 
@@ -172,6 +203,10 @@
                 <div class="mini__k">Velocity (m/s)</div>
                 <div class="mini__v" id="miniV">—</div>
               </div>
+              <div class="mini__row">
+                <div class="mini__k">hf (m / pipe)</div>
+                <div class="mini__v" id="miniHf">—</div>
+              </div>
             </div>
 
             <div class="gauge">
@@ -185,7 +220,7 @@
               <div class="gauge__labels muted">
                 <span>0</span><span>1</span><span>2</span><span>3</span><span>4+</span>
               </div>
-              <div class="help muted">Gauge reference only (typical pressure velocity window ~1–2.5 m/s).</div>
+              <div class="help muted">Reference only (typical pressure velocity window ~1–2.5 m/s).</div>
             </div>
           </div>
         </div>
@@ -198,7 +233,13 @@
             <div class="card__title">Inputs</div>
 
             <div class="field">
-              <label>Flow</label>
+              <label>Number of Pipes</label>
+              <input id="gCount" type="number" step="1" min="1" value="1" />
+              <div class="help muted">For gravity, this is informational (results shown per pipe).</div>
+            </div>
+
+            <div class="field">
+              <label>Flow (per pipe)</label>
               <div class="row">
                 <input id="gQVal" type="number" step="any" placeholder="e.g. 120" />
                 <select id="gQUnit">
@@ -215,7 +256,6 @@
             <div class="field">
               <label>Manning n</label>
               <input id="nVal" type="number" step="any" value="0.013" />
-              <div class="help muted">Typical: PVC/HDPE ~ 0.009–0.013, Concrete ~ 0.013–0.015.</div>
             </div>
 
             <div class="field">
@@ -228,7 +268,27 @@
                   <option value="permil">‰</option>
                 </select>
               </div>
-              <div class="help muted">Slope is converted internally to m/m.</div>
+            </div>
+
+            <div class="field">
+              <label>Calculation</label>
+              <select id="gravityMode">
+                <option value="DD_from_D">Find d/D (%) from Diameter</option>
+                <option value="D_full_from_Q">Find Diameter (Full Flow)</option>
+              </select>
+              <div class="help muted">d/D is computed using Manning partial-flow in a circular section.</div>
+            </div>
+
+            <div class="field" id="gDiamWrap">
+              <label>Diameter</label>
+              <div class="row">
+                <input id="gDVal" type="number" step="any" placeholder="e.g. 400" />
+                <select id="gDUnit">
+                  <option value="mm">mm</option>
+                  <option value="in">in</option>
+                  <option value="m">m</option>
+                </select>
+              </div>
             </div>
 
             <div class="actions">
@@ -237,7 +297,7 @@
             </div>
 
             <div class="note muted">
-              Gravity uses Manning for a <b>full flowing circular pipe</b>. Partial flow can be added later.
+              Manning is applied for a circular conduit; partial-flow uses wetted geometry to solve for <b>d/D</b>.
             </div>
           </div>
 
@@ -257,13 +317,15 @@
             </div>
 
             <div class="result">
-              <div class="result__label">Capacity Check</div>
-              <div class="result__value" id="gResQ">—</div>
-              <div class="result__sub muted">Manning full-flow Q</div>
+              <div class="result__label">d/D (%)</div>
+              <div class="result__value" id="gResDD">—</div>
+              <div class="result__sub muted" id="gResDDSub">—</div>
             </div>
 
-            <div class="note muted">
-              If you want: add “% full” later (partial flow), include minimum self-cleansing velocity, and headloss options.
+            <div class="result">
+              <div class="result__label">Full-flow Capacity (same D)</div>
+              <div class="result__value" id="gResQfull">—</div>
+              <div class="result__sub muted">Manning Q at d/D = 100%</div>
             </div>
           </div>
 
@@ -283,10 +345,14 @@
                 <div class="mini__k">n</div>
                 <div class="mini__v" id="gMiniN">—</div>
               </div>
+              <div class="mini__row">
+                <div class="mini__k">d/D (0–1)</div>
+                <div class="mini__v" id="gMiniDD">—</div>
+              </div>
             </div>
 
             <div class="note muted">
-              Standard diameters support can be added (snap to 200/250/300… mm and re-check velocity).
+              Want next: add “snap to standard diameters” + self-cleansing velocity check.
             </div>
           </div>
         </div>

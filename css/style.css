@@ -359,6 +359,115 @@ input:focus, select:focus{
   margin-top: 24px;
 }
 
+/* small helpers */
+.toggleRow{
+  display:flex;
+  gap:14px;
+  flex-wrap:wrap;
+  align-items:center;
+}
+.radio{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  font-size:13px;
+  color: var(--muted);
+}
+.radio input{ width:auto; }
+
+.subcard{
+  margin-top:10px;
+  border:1px solid rgba(234,240,255,.10);
+  background: rgba(255,255,255,.02);
+  border-radius: 16px;
+  padding: 10px;
+}
+
+/* Modal */
+.modal{ position:fixed; inset:0; display:none; z-index:100; }
+.modal.is-open{ display:block; }
+.modal__overlay{
+  position:absolute; inset:0;
+  background: rgba(0,0,0,.55);
+  backdrop-filter: blur(6px);
+}
+.modal__panel{
+  position:relative;
+  width:min(900px, 92vw);
+  margin: 6vh auto;
+  border-radius: 18px;
+  border:1px solid rgba(234,240,255,.12);
+  background: linear-gradient(180deg, rgba(17,27,61,.98), rgba(15,23,51,.98));
+  box-shadow: 0 30px 80px rgba(0,0,0,.55);
+  overflow:hidden;
+}
+.modal__head{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:12px;
+  padding: 14px 14px 10px;
+  border-bottom: 1px solid rgba(234,240,255,.10);
+}
+.modal__title{ font-weight:950; }
+.modal__sub{ font-size:12px; margin-top:2px; }
+.iconbtn{
+  cursor:pointer;
+  border-radius: 12px;
+  border:1px solid rgba(234,240,255,.14);
+  background: rgba(255,255,255,.03);
+  color: var(--text);
+  padding: 8px 10px;
+  font-weight:900;
+}
+.modal__body{ padding: 12px 14px; }
+.modal__foot{
+  display:flex;
+  justify-content:flex-end;
+  gap:10px;
+  padding: 12px 14px 14px;
+  border-top: 1px solid rgba(234,240,255,.10);
+}
+
+.ktable{
+  width:100%;
+  border-collapse: collapse;
+  border:1px solid rgba(234,240,255,.10);
+  border-radius: 14px;
+  overflow:hidden;
+}
+.ktable th, .ktable td{
+  padding:10px 8px;
+  border-bottom: 1px solid rgba(234,240,255,.08);
+  text-align:left;
+  font-size:13px;
+}
+.ktable thead th{
+  background: rgba(255,255,255,.03);
+  color: var(--muted);
+  font-weight:900;
+}
+.ktable input{
+  padding: 9px 10px;
+  border-radius: 12px;
+}
+.modal__sum{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-top: 10px;
+}
+.pill{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  padding: 8px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(234,240,255,.12);
+  background: rgba(255,255,255,.03);
+  font-weight:900;
+}
+
 @media (max-width: 980px){
   .hero{grid-template-columns: 1fr; }
   .grid3{grid-template-columns: 1fr;}

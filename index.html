@@ -138,7 +138,6 @@
                   <option value="ft">ft</option>
                 </select>
               </div>
-              <div class="help muted">Used for headloss calculation (Hazen–Williams).</div>
             </div>
 
             <div class="field">
@@ -275,12 +274,12 @@
               <label>Calculation</label>
               <select id="gravityMode">
                 <option value="DD_from_D">Find d/D (%) from Diameter</option>
-                <option value="D_full_from_Q">Find Diameter (Full Flow)</option>
+                <option value="D_from_Q_at_DD">Find Diameter from Q at d/D (%)</option>
               </select>
             </div>
 
             <div class="field" id="gDiamWrap">
-              <label>Diameter</label>
+              <label>Diameter (for d/D calculation)</label>
               <div class="row">
                 <input id="gDVal" type="number" step="any" placeholder="e.g. 400" />
                 <select id="gDUnit">
@@ -289,6 +288,17 @@
                   <option value="m">m</option>
                 </select>
               </div>
+            </div>
+
+            <div class="field" id="gDDWrap" style="display:none;">
+              <label>d/D (%) for sizing</label>
+              <div class="row">
+                <input id="gDDVal" type="number" step="any" value="80" />
+                <select id="gDDUnit">
+                  <option value="percent">%</option>
+                </select>
+              </div>
+              <div class="help muted">Example: 75–90% (project criteria).</div>
             </div>
 
             <div class="actions">

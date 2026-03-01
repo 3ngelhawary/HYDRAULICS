@@ -13,7 +13,7 @@
         <div class="brand__logo" aria-hidden="true">H</div>
         <div class="brand__text">
           <div class="brand__name">Hydraulic Pipe Calculator</div>
-          <div class="brand__sub">Pressure & Gravity (Manning) • Diameter • Velocity • Headloss • d/D</div>
+          <div class="brand__sub">Pressure & Gravity (Manning) • Diameter • Velocity • Headloss • d/D • Pump Head</div>
         </div>
       </div>
       <a class="chip" href="#calc">Online Calculator</a>
@@ -25,22 +25,22 @@
       <div class="hero__left">
         <h1>Hydraulic Pipe Calculator</h1>
         <p class="muted">
-          Enter <b>Total Flow</b> and number of <b>parallel pipes</b>. The calculator automatically uses
+          Enter <b>Total Flow</b> and number of <b>parallel pipes</b>. The calculator uses
           <b>Flow per pipe = Total Flow / No. of pipes</b>.
         </p>
 
         <div class="hero__badges">
           <div class="badge">
-            <div class="badge__k">Modes</div>
-            <div class="badge__v">Pressure • Gravity</div>
+            <div class="badge__k">Pressure</div>
+            <div class="badge__v">Friction + Minor + Static</div>
           </div>
           <div class="badge">
-            <div class="badge__k">Units</div>
-            <div class="badge__v">L/s • m³/s • gpm • cfs</div>
+            <div class="badge__k">Gravity</div>
+            <div class="badge__v">Manning + d/D (%)</div>
           </div>
           <div class="badge">
-            <div class="badge__k">Outputs</div>
-            <div class="badge__v">D • V • Headloss • d/D</div>
+            <div class="badge__k">Output</div>
+            <div class="badge__v">Required Pump Head</div>
           </div>
         </div>
       </div>
@@ -78,7 +78,7 @@
             <div class="field">
               <label>Number of Pipes (parallel)</label>
               <input id="pCount" type="number" step="1" min="1" value="1" />
-              <div class="help muted">Flow used in calculations is divided equally across parallel pipes.</div>
+              <div class="help muted">Per-pipe flow = Total / Pipes. Pump head equals branch headloss (parallel).</div>
             </div>
 
             <div class="field">
@@ -94,7 +94,6 @@
                   <option value="cfs">cfs</option>
                 </select>
               </div>
-              <div class="help muted">Converted internally to m³/s. Per-pipe flow = Total / Pipes.</div>
             </div>
 
             <div class="field">
@@ -145,6 +144,83 @@
               <input id="hwC" type="number" step="any" value="130" />
             </div>
 
+            <div class="field">
+              <label>Minor Losses</label>
+              <div class="toggleRow">
+                <label class="radio">
+                  <input type="radio" name="minorMode" id="minorPctMode" checked>
+                  <span>Percent of friction</span>
+                </label>
+                <label class="radio">
+                  <input type="radio" name="minorMode" id="minorKMode">
+                  <span>Fittings & Valves (K)</span>
+                </label>
+              </div>
+
+              <div id="minorPctWrap" class="subcard">
+                <div class="row">
+                  <input id="minorPct" type="number" step="any" value="10" />
+                  <select id="minorPctUnit">
+                    <option value="percent">%</option>
+                  </select>
+                </div>
+                <div class="help muted">Typical 10–15% (user input).</div>
+              </div>
+
+              <div id="minorKWrap" class="subcard" style="display:none;">
+                <button class="btn btn--ghost" id="btnEditK" type="button">Edit fittings / valves</button>
+                <div class="help muted">Minor head = ΣK · V²/(2g). K table is editable.</div>
+              </div>
+            </div>
+
+            <div class="field">
+              <label>Static Head</label>
+              <div class="toggleRow">
+                <label class="radio">
+                  <input type="radio" name="staticMode" id="staticFixedMode" checked>
+                  <span>Fixed</span>
+                </label>
+                <label class="radio">
+                  <input type="radio" name="staticMode" id="staticAutoMode">
+                  <span>Auto (levels)</span>
+                </label>
+              </div>
+
+              <div id="staticFixedWrap" class="subcard">
+                <div class="row">
+                  <input id="staticFixed" type="number" step="any" value="0" />
+                  <select id="staticFixedUnit">
+                    <option value="m">m</option>
+                    <option value="ft">ft</option>
+                  </select>
+                </div>
+              </div>
+
+              <div id="staticAutoWrap" class="subcard" style="display:none;">
+                <div class="field" style="margin-bottom:10px;">
+                  <label>Pump axis level</label>
+                  <div class="row">
+                    <input id="pumpAxis" type="number" step="any" placeholder="e.g. 12.5" />
+                    <select id="pumpAxisUnit">
+                      <option value="m">m</option>
+                      <option value="ft">ft</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="field" style="margin-bottom:0;">
+                  <label>Max elevation on route</label>
+                  <div class="row">
+                    <input id="maxElev" type="number" step="any" placeholder="e.g. 34.0" />
+                    <select id="maxElevUnit">
+                      <option value="m">m</option>
+                      <option value="ft">ft</option>
+                    </select>
+                  </div>
+                </div>
+                <div class="help muted">Static head = max(0, MaxElev − PumpAxis).</div>
+              </div>
+            </div>
+
             <div class="actions">
               <button class="btn" id="btnCalcPressure">Calculate</button>
               <button class="btn btn--ghost" id="btnResetPressure">Reset</button>
@@ -167,20 +243,27 @@
             </div>
 
             <div class="result">
-              <div class="result__label">Headloss (each pipe)</div>
+              <div class="result__label">Friction Loss hf (each pipe)</div>
               <div class="result__value" id="resHf">—</div>
               <div class="result__sub" id="resHfSub">—</div>
             </div>
 
             <div class="result">
-              <div class="result__label">Headloss (system)</div>
-              <div class="result__value" id="resHfSys">—</div>
-              <div class="result__sub" id="resHfSysSub">Parallel pipes → same headloss</div>
+              <div class="result__label">Minor Loss hm (each pipe)</div>
+              <div class="result__value" id="resHm">—</div>
+              <div class="result__sub" id="resHmSub">—</div>
             </div>
 
-            <div class="note muted">
-              Hazen–Williams (SI): <b>hf = 10.67 · L · Q<sup>1.852</sup> / (C<sup>1.852</sup> · D<sup>4.871</sup>)</b>
-              where Q is <b>per pipe</b>.
+            <div class="result">
+              <div class="result__label">Static Head hs</div>
+              <div class="result__value" id="resHs">—</div>
+              <div class="result__sub" id="resHsSub">—</div>
+            </div>
+
+            <div class="result">
+              <div class="result__label">Required Pump Head (TDH)</div>
+              <div class="result__value" id="resTDH">—</div>
+              <div class="result__sub" id="resTDHSub">hf + hm + hs</div>
             </div>
           </div>
 
@@ -197,16 +280,12 @@
                 <div class="mini__v" id="miniQ">—</div>
               </div>
               <div class="mini__row">
-                <div class="mini__k">Diameter (m)</div>
-                <div class="mini__v" id="miniD">—</div>
+                <div class="mini__k">Pipes</div>
+                <div class="mini__v" id="miniPipes">—</div>
               </div>
               <div class="mini__row">
-                <div class="mini__k">Velocity (m/s)</div>
-                <div class="mini__v" id="miniV">—</div>
-              </div>
-              <div class="mini__row">
-                <div class="mini__k">hf (m / pipe)</div>
-                <div class="mini__v" id="miniHf">—</div>
+                <div class="mini__k">ΣK (if K mode)</div>
+                <div class="mini__v" id="miniSumK">—</div>
               </div>
             </div>
 
@@ -221,6 +300,11 @@
               <div class="gauge__labels muted">
                 <span>0</span><span>1</span><span>2</span><span>3</span><span>4+</span>
               </div>
+            </div>
+
+            <div class="note muted">
+              Parallel pipes: the system headloss equals the headloss of <b>one</b> branch (same start/end nodes).
+              Only the flow splits.
             </div>
           </div>
         </div>
@@ -298,7 +382,6 @@
                   <option value="percent">%</option>
                 </select>
               </div>
-              <div class="help muted">Example: 75–90% (project criteria).</div>
             </div>
 
             <div class="actions">
@@ -348,27 +431,58 @@
                 <div class="mini__v" id="gMiniQ">—</div>
               </div>
               <div class="mini__row">
-                <div class="mini__k">Slope (m/m)</div>
-                <div class="mini__v" id="gMiniS">—</div>
-              </div>
-              <div class="mini__row">
-                <div class="mini__k">n</div>
-                <div class="mini__v" id="gMiniN">—</div>
-              </div>
-              <div class="mini__row">
-                <div class="mini__k">d/D (0–1)</div>
-                <div class="mini__v" id="gMiniDD">—</div>
+                <div class="mini__k">Pipes</div>
+                <div class="mini__v" id="gMiniPipes">—</div>
               </div>
             </div>
           </div>
         </div>
       </div>
+
     </section>
 
     <footer class="footer muted">
       <div>© Hydraulic Calculator • Built for fast design checks</div>
     </footer>
   </main>
+
+  <!-- Modal: Fittings & Valves K table -->
+  <div class="modal" id="kModal" aria-hidden="true">
+    <div class="modal__overlay" id="kModalOverlay"></div>
+    <div class="modal__panel" role="dialog" aria-modal="true" aria-label="Fittings and valves K values">
+      <div class="modal__head">
+        <div>
+          <div class="modal__title">Fittings & Valves (K values)</div>
+          <div class="modal__sub muted">Edit quantities and K values. Minor head = ΣK · V²/(2g)</div>
+        </div>
+        <button class="iconbtn" id="kModalClose" type="button" aria-label="Close">✕</button>
+      </div>
+
+      <div class="modal__body">
+        <table class="ktable" id="kTable">
+          <thead>
+            <tr>
+              <th style="width:46%">Item</th>
+              <th style="width:18%">Qty</th>
+              <th style="width:18%">K</th>
+              <th style="width:18%">K×Qty</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+
+        <div class="modal__sum">
+          <div class="pill">ΣK = <span id="sumKText">0</span></div>
+          <div class="muted">You can change any K value.</div>
+        </div>
+      </div>
+
+      <div class="modal__foot">
+        <button class="btn btn--ghost" id="kModalReset" type="button">Reset Defaults</button>
+        <button class="btn" id="kModalSave" type="button">Save</button>
+      </div>
+    </div>
+  </div>
 
   <script src="js/app.js"></script>
 </body>
